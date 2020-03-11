@@ -1,19 +1,30 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
+import useEffectKey from "../hooks/useEffectKey";
+import useUpdateDocTitle from "../hooks/useUpdateDocTitle";
 
 import cookieSrc from "../cookie.svg";
 import Item from "./Item";
 import useInterval from "../hooks/use-interval.hook";
 
 const items = [
-    { id: "cursor", name: "Cursor", cost: 10, value: 1 },
-    { id: "grandma", name: "Grandma", cost: 100, value: 10 },
-    { id: "farm", name: "Farm", cost: 1000, value: 80 }
+    {
+        id: "megaCursor",
+        name: "Mega Cursor",
+        cost: 10,
+        value: 1,
+        type: "click"
+    },
+    { id: "cursor", name: "Cursor", cost: 10, value: 1, type: "tick" },
+    { id: "grandma", name: "Grandma", cost: 100, value: 10, type: "tick" },
+    { id: "farm", name: "Farm", cost: 1000, value: 80, type: "tick" }
 ];
 const calculateCookiesPerTick = purchasedItems => {
     let tick = 0;
     items.forEach(item => {
-        tick += purchasedItems[item.id] * item.value;
+        if (item.type === "tick") {
+            tick += purchasedItems[item.id] * item.value;
+        }
     });
     return tick;
 };
@@ -22,58 +33,36 @@ const Game = () => {
     // TODO: Replace this with React state!
     const [numCookies, setNumCookies] = useState(1000);
     const [purchasedItems, setPurchasedItems] = useState({
+        megaCursor: 0,
         cursor: 0,
         grandma: 0,
         farm: 0
     });
     const handleClick = item => {
-        console.log("clicked!");
         if (numCookies < item.cost) {
             alert(`You can't afford ${item.name}!`);
             return;
         } else {
             setNumCookies(numCookies - item.cost);
-            let tempItemObj = purchasedItems;
-            tempItemObj[item["id"]]++;
             setPurchasedItems({
                 ...purchasedItems,
-                [item["id"]]: purchasedItems[item["id"]]++
+                [item["id"]]: purchasedItems[item["id"]] + 1
             });
-            console.log(purchasedItems);
+            console.log(item["id"]);
+            item["cost"] = Math.floor(item["cost"] * 1.12);
         }
     };
     useInterval(() => {
         const numOfGeneratedCookies = calculateCookiesPerTick(purchasedItems);
         setNumCookies(numCookies + numOfGeneratedCookies);
     }, 1000);
-    useEffect(() => {
-        document.title = `${numCookies} cookies`;
 
-        return () => {
-            document.title = `Cookie Clicker Workshop`;
-        };
-    }, [numCookies]);
-    function handleKeydown(ev) {
-        console.log(ev.code);
-        if (ev.code === "Space") {
-            ev.preventDefault();
-            setNumCookies(numCookies + 1);
-        }
-    }
-    useEffect(() => {
-        window.addEventListener("keydown", handleKeydown);
-        return () => {
-            window.removeEventListener("keydown", handleKeydown);
-        };
-    });
-    // why doesn't this work with an empty array?
-    // const refFunc (childRef) => {
-
-    // }
-
-    // useEffect(() => {
-    //     firstItemRef.current.focus();
-    // }, []);
+    useUpdateDocTitle(`${numCookies} cookies`, `Cookie Clicker Workshop`);
+    const incrementCookies = () => {
+        setNumCookies(numCookies + 1 + purchasedItems.megaCursor);
+        return;
+    };
+    useEffectKey("Space", incrementCookies);
     return (
         <Wrapper>
             <GameArea>
@@ -84,7 +73,7 @@ const Game = () => {
                     </strong>{" "}
                     cookies per second
                 </Indicator>
-                <Button onClick={() => setNumCookies(numCookies + 1)}>
+                <Button onClick={() => incrementCookies()}>
                     <Cookie src={cookieSrc} />
                 </Button>
             </GameArea>

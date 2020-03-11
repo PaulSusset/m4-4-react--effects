@@ -14,8 +14,11 @@ const Item = ({ item, numOwned, handleClick, index }) => {
             <TextBox>
                 <h3>{item.name}</h3>
                 <p>
-                    Cost: {item.cost} cookies. Produces {item.value}{" "}
-                    cookie(s)/second
+                    {item.type === "tick"
+                        ? `Cost: ${item.cost} cookies. Produces ${item.value} 
+                    cookie(s)/second`
+                        : `Cost: ${item.cost} cookies. Makes your click generate ${item.value} 
+                    more cookie(s)`}
                 </p>
             </TextBox>
             <BigNum>
