@@ -8,9 +8,9 @@ What happens when you want to do something _other_ than rendering to the screen?
 
 ---
 
-- Updating the document title
-- Fetching data from a network
-- Doing something when the user scrolls
+-   Updating the document title
+-   Fetching data from a network
+-   Doing something when the user scrolls
 
 ---
 
@@ -19,8 +19,8 @@ What happens when you want to do something _other_ than rendering to the screen?
 Here's how we do this in vanilla JS:
 
 ```js
-window.addEventListener('scroll', () => {
-  console.log('User scrolled!')
+window.addEventListener("scroll", () => {
+    console.log("User scrolled!");
 });
 ```
 
@@ -34,22 +34,23 @@ What about in React?
 
 ```js
 const App = () => {
-  window.addEventListener('scroll', () => {
-    console.log('scroll')
-  })
+    window.addEventListener("scroll", () => {
+        console.log("scroll");
+    });
 
-  return <div style={{ height: '300vh' }}>
-    <p>This is bad.</p>
-    <p>
-      Set some state in the event
-      <br />
-      listener to see why
-    </p>
-  </div>
-}
+    return (
+        <div style={{ height: "300vh" }}>
+            <p>This is bad.</p>
+            <p>
+                Set some state in the event
+                <br />
+                listener to see why
+            </p>
+        </div>
+    );
+};
 
-render(<App />)
-
+render(<App />);
 ```
 
 ---
@@ -61,9 +62,7 @@ render(<App />)
 ```js
 // `useEffect` takes a function.
 // It calls this function AFTER the render
-React.useEffect(() => {
-
-})
+React.useEffect(() => {});
 ```
 
 ---
@@ -72,7 +71,7 @@ It takes a "dependencies" array
 
 ```js
 React.useEffect(() => {
-    console.log('some state changed!')
+    console.log("some state changed!");
 }, [someState, someOtherState]);
 ```
 
@@ -82,31 +81,28 @@ Neat example: logging
 
 ```js live=true
 const Input = ({ val, onChange }) => {
-  React.useEffect(() => {
-    console.log(val)
-  }, [val]);
+    React.useEffect(() => {
+        console.log(val);
+    }, [val]);
 
-  return <input
-    value={val}
-    onChange={(ev) =>
-      onChange(ev.currentTarget.value)
-    }
-  />
-}
+    return (
+        <input value={val} onChange={ev => onChange(ev.currentTarget.value)} />
+    );
+};
 
 const App = ({ title }) => {
-  const [name, setName] = React.useState('');
-  const [address, setAddress] = React.useState('');
+    const [name, setName] = React.useState("");
+    const [address, setAddress] = React.useState("");
 
-  return (
-    <>
-      <Input val={name} onChange={setName} />
-      <Input val={address} onChange={setAddress} />
-    </>
-  )
-}
+    return (
+        <>
+            <Input val={name} onChange={setName} />
+            <Input val={address} onChange={setAddress} />
+        </>
+    );
+};
 
-render(<App />)
+render(<App />);
 ```
 
 ---
@@ -119,26 +115,30 @@ You _definitely_ don't want to do this in every render
 
 ```js
 const App = () => {
-  const [cart, setCart] = React.useState({});
+    const [cart, setCart] = React.useState({});
 
-  fetch('some-url')
-    .then(data => {
-      console.log('Got data:', data);
-      setCart(data);
-    })
+    // fetch('some-url')
+    //   .then(data => {
+    //     console.log('Got data:', data);
+    //     setCart(data);
+    //   })
 
-  React.useEffect(() => {
-      fetch('some-url')
-        .then(data => {
-          console.log('Got data:', data);
-          setCart(data);
-        });
-    
-      return JSON.stringify(cart, null, 2);
-  }, [cart]);
-  
-  // ...
-}
+    React.useEffect(
+        () => {
+            fetch("some-url").then(data => {
+                console.log("Got data:", data);
+                setCart(data);
+            });
+
+            return JSON.stringify(cart, null, 2);
+        },
+        [
+            //cart
+        ]
+    );
+
+    // ...
+};
 ```
 
 ---
@@ -155,57 +155,52 @@ Update the following snippets to make use of `useEffect`
 
 ```js
 const App = () => {
-  const [count, setCount] = React.useState(0);
+    const [count, setCount] = React.useState(0);
+    React.useEffect(() => {
+        document.title = `You have clicked ${count} times`;
+    }, [count]);
 
-  document.title = `You have clicked ${count} times`;
-
-  return (
-    <button onClick={() => setCount(count + 1)}>
-      Increment
-    </button>
-  );
-}
+    return <button onClick={() => setCount(count + 1)}>Increment</button>;
+};
 ```
 
 ---
 
 ```js
 const App = ({ color }) => {
-  const [value, setValue] = React.useState(false);
+    const [value, setValue] = React.useState(false);
+    React.useEffect(() => {
+        window.localStorage.setItem("value", value);
+    }, [value]);
+    React.useEffect(() => {
+        window.localStorage.setItem("color", color);
+    }, [color]);=
 
-  window.localStorage.setItem('value', value);
-  window.localStorage.setItem('color', color);
-
-  return (
-    <div>
-      Value: {value}
-      <button onClick={() => setValue(!value)}>
-        Toggle thing
-      </button>
-    </div>
-  );
-}
+    return (
+        <div>
+            Value: {value}
+            <button onClick={() => setValue(!value)}>Toggle thing</button>
+        </div>
+    );
+};
 ```
 
 ---
 
 ```js
 const Modal = ({ handleClose }) => {
-  window.addEventListener('keydown', (ev) => {
-    if (ev.code === 'Escape') {
-      handleClose();
-    }
-  });
-
-  return (
-    <div>
-      Modal stuff
-    </div>
-  );
-}
+    React.useEffect(() => {
+        window.addEventListener("keydown", ev => {
+            if (ev.code === "Escape") {
+                handleClose();
+            }
+        });
+    }, []);
+    return <div>Modal stuff</div>;
+};
 ```
 
----
+## Empty array loads the useEffect when the component is loaded the very first time only
 
 # Unsubscribing
 
@@ -237,18 +232,16 @@ It also has a link to the other route.
 
 ```js
 const Home = () => {
-  React.useEffect(() => {
-    window.addEventListener('scroll', func());
-  }, []);
+    React.useEffect(() => {
+        window.addEventListener("scroll", func());
+    }, []);
 
-  return (
-    <div>
-      <Link to="/about">
-        About
-      </Link>
-    </div>
-  );
-}
+    return (
+        <div>
+            <Link to="/about">About</Link>
+        </div>
+    );
+};
 ```
 
 ---
@@ -265,14 +258,14 @@ The scroll handler _doesn't go away_ just because we changed components.
 
 ```js
 const Home = () => {
-  React.useEffect(() => {
-    window.addEventListener('scroll', aFunc());
+    React.useEffect(() => {
+        window.addEventListener("scroll", aFunc());
 
-    return () => {
-      window.removeEventListener('scroll', aFunc());
-    }
-  }, []);
-}
+        return () => {
+            window.removeEventListener("scroll", aFunc());
+        };
+    }, []);
+};
 ```
 
 ---
@@ -314,28 +307,35 @@ Make sure to do the appropriate cleanup work
 ```js
 // seTimeout is similar to setInterval...
 const App = () => {
-  React.useEffect(() => {
-    window.setTimeout(() => {
-      console.log('1 second after update!')
-    });
-  }, [])
+  const time = window.setTimeout((timer) => {
+    console.log("1 second after update!");
+  }, timer);
+    React.useEffect(() => {
+      time(timer)
 
-  return null;
-}
+        return {()=> clearTimeout(time)}
+    }, []);
+
+    return null;
+};
 ```
 
 ---
 
 ```js
 const App = () => {
-  React.useEffect(() => {
-    window.addEventListener('keydown', (ev) => {
-      console.log('You pressed: ' + ev.code);
-    })
-  }, [])
+  const handleKey = (ev) => {
+    console.log("You pressed: " + ev.code);
+    }
+  }
+    React.useEffect(() => {
+        window.addEventListener("keydown", handleKey);
+      return () => {
+        window.removeEventListener("keydown", handleKey);
+    }, []);
 
-  return null;
-}
+    return null;
+};
 ```
 
 ---
@@ -350,10 +350,10 @@ A custom hook is a **function** that starts with **use**.
 
 Examples:
 
-- _useApiEndpoint_
-- _useTextToSpeech_
-- _useScrollPosition_
-- _useCounter_
+-   _useApiEndpoint_
+-   _useTextToSpeech_
+-   _useScrollPosition_
+-   _useCounter_
 
 React tooling actually **does** care that the name starts with `use`.
 
@@ -374,38 +374,68 @@ Tracking mouse position
 
 ```js
 const App = ({ path }) => {
-  const [mousePosition, setMousePosition] = React.useState({
-    x: null,
-    y: null
-  });
+    const [mousePosition, setMousePosition] = React.useState({
+        x: null,
+        y: null
+    });
 
-  React.useEffect(() => {
-    const handleMousemove = (ev) => {
-      setMousePosition({ x: ev.clientX, y: ev.clientY });
-    };
+    React.useEffect(() => {
+        const handleMousemove = ev => {
+            setMousePosition({ x: ev.clientX, y: ev.clientY });
+        };
 
-    window.addEventListener('mousemove', handleMousemove);
+        window.addEventListener("mousemove", handleMousemove);
 
-    return () => {
-      window.removeEventListener('mousemove', handleMousemove)
-    }
-  }, []);
+        return () => {
+            window.removeEventListener("mousemove", handleMousemove);
+        };
+    }, []);
 
-  return (
-    <div>
-      The mouse is at {mousePosition.x}, {mousePosition.y}.
-    </div>
-  )
-}
+    return (
+        <div>
+            The mouse is at {mousePosition.x}, {mousePosition.y}.
+        </div>
+    );
+};
 ```
+
 </div>
 <div class='col'>
 
 ```js
 // refactoring time...
+const useMousePos = () => {
+    const [mousePosition, setMousePosition] = React.useState({
+        x: null,
+        y: null
+    });
+    React.useEffect(() => {
+        const handleMousemove = ev => {
+            setMousePosition({ x: ev.clientX, y: ev.clientY });
+        };
 
+        window.addEventListener("mousemove", handleMousemove);
+
+        return () => {
+            window.removeEventListener("mousemove", handleMousemove);
+        };
+    }, []);
+    return mousePosition;
+};
+const App = ({ path }) => {
+    const mousePosition = useMousePos();
+    return (
+        <div>
+            The mouse is at {mousePosition.x}, {mousePosition.y}.
+        </div>
+    );
+};
 ```
+
+A custom hook is simply a function that uses default React hooks. It MUST start with 'use' in order to have React hooks within.
+
 </div>
+
 </div>
 
 ---
@@ -417,51 +447,49 @@ Extract a custom hook
 ---
 
 ```js
+const useFetch = path => {
+    const [data, setData] = React.useState(null);
+    React.useEffect(() => {
+        fetch(path)
+            .then(res => res.json())
+            .then(json => {
+                setData(json);
+            });
+    }, [path]);
+    return data;
+};
+
 const App = ({ path }) => {
-  const [data, setData] = React.useState(null);
-
-  React.useEffect(() => {
-    fetch(path)
-      .then(res => res.json())
-      .then(json => {
-        setData(json);
-      })
-  }, [path])
-
-  return (
-    <span>
-      Data: {JSON.stringify(data)}
-    </span>
-  );
-}
+    return <span>Data: {JSON.stringify(useFetch(path))}</span>;
+};
 ```
 
 ---
 
 ```js live=true
 const Time = ({ throttleDuration }) => {
-  const [time, setTime] = React.useState(
-    new Date()
-  );
+    const [time, setTime] = React.useState(new Date());
 
-  React.useEffect(() => {
-    const intervalId = window.setInterval(() => {
-      setTime(new Date());
-    }, throttleDuration);
+    React.useEffect(() => {
+        const intervalId = window.setInterval(() => {
+            setTime(new Date());
+        }, throttleDuration);
 
-    return () => {
-      window.clearInterval(intervalId);
-    }
-  }, [throttleDuration])
+        return () => {
+            window.clearInterval(intervalId);
+        };
+    }, [throttleDuration]);
 
-  return (
-    <span>
-      It is currently<br />{time.toTimeString()}
-    </span>
-  );
-}
+    return (
+        <span>
+            It is currently
+            <br />
+            {time.toTimeString()}
+        </span>
+    );
+};
 
-render(<Time throttleDuration={1000} />)
+render(<Time throttleDuration={1000} />);
 ```
 
 ---
